@@ -14,16 +14,141 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      invite_responses: {
+        Row: {
+          created_at: string
+          id: string
+          is_free: boolean
+          is_single: boolean
+          range_end: string | null
+          range_start: string | null
+          selected_date: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_free?: boolean
+          is_single?: boolean
+          range_end?: string | null
+          range_start?: string | null
+          selected_date?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_free?: boolean
+          is_single?: boolean
+          range_end?: string | null
+          range_start?: string | null
+          selected_date?: string | null
+        }
+        Relationships: []
+      }
+      invite_settings: {
+        Row: {
+          allow_date_range: boolean
+          allow_single_date: boolean
+          blocked_dates: string[]
+          confirmation_message: string
+          cta_label: string
+          date_selection_enabled: boolean
+          date_title: string
+          id: string
+          max_date: string
+          min_date: string
+          no_label_free: string
+          no_label_single: string
+          no_message_free: string
+          no_message_single: string
+          question_free: string
+          question_single: string
+          updated_at: string
+          welcome_subtitle: string
+          welcome_title: string
+          yes_label: string
+        }
+        Insert: {
+          allow_date_range?: boolean
+          allow_single_date?: boolean
+          blocked_dates?: string[]
+          confirmation_message?: string
+          cta_label?: string
+          date_selection_enabled?: boolean
+          date_title?: string
+          id?: string
+          max_date?: string
+          min_date?: string
+          no_label_free?: string
+          no_label_single?: string
+          no_message_free?: string
+          no_message_single?: string
+          question_free?: string
+          question_single?: string
+          updated_at?: string
+          welcome_subtitle?: string
+          welcome_title?: string
+          yes_label?: string
+        }
+        Update: {
+          allow_date_range?: boolean
+          allow_single_date?: boolean
+          blocked_dates?: string[]
+          confirmation_message?: string
+          cta_label?: string
+          date_selection_enabled?: boolean
+          date_title?: string
+          id?: string
+          max_date?: string
+          min_date?: string
+          no_label_free?: string
+          no_label_single?: string
+          no_message_free?: string
+          no_message_single?: string
+          question_free?: string
+          question_single?: string
+          updated_at?: string
+          welcome_subtitle?: string
+          welcome_title?: string
+          yes_label?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +275,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const
