@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { DatePlan } from "./date-plan";
 
 export type InviteSettings = {
   id: string;
@@ -20,10 +21,11 @@ export type InviteSettings = {
   allow_single_date: boolean;
   allow_date_range: boolean;
   blocked_dates: string[];
+  available_windows: { start: string; end: string }[];
   updated_at: string;
 };
 
-export type InviteResponse = {
+export type InviteResponse = Partial<DatePlan> & {
   id: string;
   is_single: boolean;
   is_free: boolean;
@@ -66,6 +68,11 @@ export function eachDay(start: Date, end: Date): Date[] {
   return days;
 }
 
+const isoDateSchema = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date")
+  .refine((value) => toISODate(fromISODate(value)) === value, "Invalid date");
+
 export const settingsSchema = z.object({
   question_single: z.string().trim().min(1, "Required").max(200),
   question_free: z.string().trim().min(1, "Required").max(200),
@@ -80,18 +87,49 @@ export const settingsSchema = z.object({
   welcome_subtitle: z.string().trim().min(1, "Required").max(300),
   cta_label: z.string().trim().min(1, "Required").max(60),
   date_selection_enabled: z.boolean(),
-  min_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date"),
-  max_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date"),
+  min_date: isoDateSchema,
+  max_date: isoDateSchema,
   allow_single_date: z.boolean(),
   allow_date_range: z.boolean(),
-  blocked_dates: z.array(z.string().regex(/^\d{4}-\d{2}-\d{2}$/)),
+  blocked_dates: z.array(isoDateSchema),
 });
 
 export type SettingsInput = z.infer<typeof settingsSchema>;
 
+/** Admin-generated contiguous windows let Firestore rules reject ranges crossing blocked days. */
+export function buildAvailableWindows(
+  settings: SettingsInput,
+): InviteSettings["available_windows"] {
+  if (settings.min_date > settings.max_date)
+    throw new Error("The minimum date must be before the maximum date.");
+  if (
+    settings.date_selection_enabled &&
+    !settings.allow_single_date &&
+    !settings.allow_date_range
+  ) {
+    throw new Error("Enable at least one date selection mode.");
+  }
+  const windows: InviteSettings["available_windows"] = [];
+  const blocked = [...new Set(settings.blocked_dates)]
+    .filter((day) => day >= settings.min_date && day <= settings.max_date)
+    .sort();
+  let start = settings.min_date;
+  for (const day of blocked) {
+    if (start < day) {
+      const previous = fromISODate(day);
+      previous.setDate(previous.getDate() - 1);
+      windows.push({ start, end: toISODate(previous) });
+    }
+    const next = fromISODate(day);
+    next.setDate(next.getDate() + 1);
+    start = toISODate(next);
+  }
+  if (start <= settings.max_date) windows.push({ start, end: settings.max_date });
+  return windows;
+}
+
 export type Selection =
-  | { kind: "single"; date: string }
-  | { kind: "range"; start: string; end: string };
+  { kind: "single"; date: string } | { kind: "range"; start: string; end: string };
 
 /** Server-agnostic validation of a chosen date/range against admin settings. */
 export function validateSelection(
@@ -108,6 +146,7 @@ export function validateSelection(
   const inWindow = (d: string) => d >= min && d <= max;
 
   if (selection.kind === "single") {
+    if (!isoDateSchema.safeParse(selection.date).success) return "That date isn't valid.";
     if (!settings.allow_single_date) return "Single dates aren't allowed — pick a range.";
     if (!inWindow(selection.date)) return "That date isn't available.";
     if (blocked.has(selection.date)) return "That date is blocked. Try another one.";
@@ -115,6 +154,11 @@ export function validateSelection(
   }
 
   if (!settings.allow_date_range) return "Date ranges aren't allowed — pick one day.";
+  if (
+    !isoDateSchema.safeParse(selection.start).success ||
+    !isoDateSchema.safeParse(selection.end).success
+  )
+    return "That range isn't valid.";
   if (selection.start > selection.end) return "The range looks backwards.";
   if (!inWindow(selection.start) || !inWindow(selection.end)) return "That range isn't available.";
   const days = eachDay(fromISODate(selection.start), fromISODate(selection.end));

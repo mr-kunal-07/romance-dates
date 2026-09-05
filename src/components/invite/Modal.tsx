@@ -16,7 +16,7 @@ export function Modal({ open, stepKey, title, children }: ModalProps) {
       {open && (
         <motion.div
           key="backdrop"
-          className="fixed inset-0 z-50 flex items-end justify-center px-4 pb-4 sm:items-center sm:pb-0"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -27,7 +27,7 @@ export function Modal({ open, stepKey, title, children }: ModalProps) {
           <AnimatePresence mode="wait">
             <motion.div
               key={stepKey}
-              className="card-glass relative w-full max-w-md rounded-4xl p-6 sm:p-8"
+              className="card-glass relative max-h-[calc(100dvh-2rem)] w-full max-w-md overflow-y-auto rounded-lg p-6 sm:p-8"
               initial={{ opacity: 0, y: 32, scale: 0.96 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -20, scale: 0.97 }}
@@ -38,7 +38,7 @@ export function Modal({ open, stepKey, title, children }: ModalProps) {
                   {title}
                 </h2>
               ) : null}
-              <div className="mt-6">{children}</div>
+              <div className={title ? "mt-6" : undefined}>{children}</div>
             </motion.div>
           </AnimatePresence>
         </motion.div>

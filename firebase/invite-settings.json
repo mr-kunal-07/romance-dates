@@ -1,0 +1,20 @@
+{
+  "question_single": "Are you single? ❤️",
+  "question_free": "Are you free? 👀",
+  "yes_label": "Yes ❤️",
+  "no_label_single": "No 😏",
+  "no_label_free": "No 😌",
+  "no_message_single": "Hmm... I think you need to think about that one again 😏",
+  "no_message_free": "Aww... I'll wait for you 🥺❤️",
+  "date_title": "When are you free for me? 🥰",
+  "confirmation_message": "Yay! It's a date! ❤️",
+  "welcome_title": "Hey Sanskruti 💕",
+  "welcome_subtitle": "I made something just for you. Promise it'll only take a minute.",
+  "cta_label": "Let's see 👀",
+  "date_selection_enabled": true,
+  "min_date": "2026-08-24",
+  "max_date": "2026-10-23",
+  "allow_single_date": true,
+  "allow_date_range": false,
+  "blocked_dates": []
+}

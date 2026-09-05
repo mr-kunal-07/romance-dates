@@ -1,0 +1,52 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAdmin() {
+      return request.auth != null && request.auth.token.admin == true;
+    }
+
+    match /invite_settings/{id} {
+      allow get: if id == 'default';
+      allow list: if isAdmin();
+      allow create, update: if id == 'default' && isAdmin();
+      allow delete: if false;
+    }
+
+    function validDate(day) {
+      return day is string && day.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$');
+    }
+
+    function inWindow(start, end, settings, index) {
+      let window = settings.available_windows[index];
+      return validDate(start) && validDate(end) && start <= end
+        && start >= settings.min_date && end <= settings.max_date
+        && start >= window.start && end <= window.end;
+    }
+
+    function validResponse() {
+      let data = request.resource.data;
+      let settings = get(/databases/$(database)/documents/invite_settings/default).data;
+      return data.keys().hasAll(['is_single', 'is_free', 'selected_date', 'range_start', 'range_end', 'window_index', 'created_at', 'date_type', 'outfit'])
+        && data.keys().hasOnly(['is_single', 'is_free', 'selected_date', 'range_start', 'range_end', 'window_index', 'created_at', 'date_type', 'outfit'])
+        && data.date_type in ['coffee', 'dinner', 'surprise']
+        && data.outfit in ['blue', 'sage', 'rose', 'decide_later']
+        && data.is_single == true && data.is_free == true
+        && data.created_at == request.time
+        && settings.date_selection_enabled == true
+        && data.window_index is int && data.window_index >= 0
+        && data.window_index < settings.available_windows.size()
+        && (
+          (settings.allow_single_date == true && data.range_start == null && data.range_end == null
+            && inWindow(data.selected_date, data.selected_date, settings, data.window_index))
+          || (settings.allow_date_range == true && data.selected_date == null
+            && inWindow(data.range_start, data.range_end, settings, data.window_index))
+        );
+    }
+
+    match /invite_responses/{id} {
+      allow create: if validResponse();
+      allow read: if isAdmin();
+      allow update, delete: if false;
+    }
+  }
+}

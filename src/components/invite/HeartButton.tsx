@@ -37,7 +37,7 @@ export function HeartButton({
       whileHover={{ scale: disabled ? 1 : 1.02 }}
       transition={{ type: "spring", stiffness: 400, damping: 22 }}
       className={cn(
-        "inline-flex min-h-14 items-center justify-center rounded-full px-6 text-base font-semibold tracking-wide transition-opacity",
+        "inline-flex min-h-14 items-center justify-center rounded-lg px-6 text-base font-semibold tracking-wide transition-opacity",
         "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none",
         full && "w-full",
         disabled && "cursor-not-allowed opacity-60",

@@ -1,0 +1,1 @@
+These three original outfit boards (blue.png, sage.png, rose.png) were created with the built-in image generation tool using the project owner-supplied Him / Her fashion board as a composition reference. No Instagram photographs are used in the slider.

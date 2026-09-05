@@ -1,130 +1,73 @@
 # My Date Planner
 
-Build a romantic, playful, mobile-first web application that I can send to my girlfriend.
-The app should feel cute, modern, smooth, and slightly playful, with beautiful animations, hearts, soft gradients, and a polished UI.
-MAIN USER FLOW:
-1. Landing screen
-- Show a romantic welcome message.
-- Add a button such as "Let's see 👀".
-- When clicked, open the first modal.
-2. First modal:
-Question:
-"Are you single? ❤️"
-Buttons:
-- "Yes ❤️"
-- "No 😏"
-If the user clicks "No":
-- Do NOT proceed to the next question.
-- Keep the modal/page in the same place.
-- Show a playful message such as:
-  "Hmm... I think you need to think about that one again 😏"
-- Optionally add a small playful animation.
-If the user clicks "Yes":
-- Smoothly transition to the second modal.
-3. Second modal:
-Question:
-"Are you free? 👀"
-Buttons:
-- "Yes ❤️"
-- "No 😌"
-If the user clicks "No":
-- Do NOT proceed.
-- Stay on the current modal.
-- Show a cute/playful message such as:
-  "Aww... I'll wait for you 🥺❤️"
-If the user clicks "Yes":
-- Open the date-selection modal.
-4. Date selection modal:
-Title:
-"When are you free for me? 🥰"
-Show a beautiful calendar/date picker.
-The user should be able to select:
-- A single date
-OR
-- A date range
-The available dates must be controlled by the admin panel.
-5. Confirmation screen:
-After selecting the date/date range, show a romantic confirmation message.
-For example:
-"Yay! It's a date! ❤️"
-Then display:
-"You chose: [selected date/date range]"
-Add a final button:
-"Confirm ❤️"
-After confirmation, save the response.
-ADMIN PANEL:
-Create a secure-looking admin dashboard with:
-1. Date Settings
-- Enable/disable date selection
-- Minimum available date
-- Maximum available date
-- Allow single date
-- Allow date range
-- Configure unavailable/blocked dates
-2. Question Settings
-Allow the admin to edit:
-- "Are you single?" question
-- "Are you free?" question
-- Yes button text
-- No button text
-- Messages shown after clicking No
-- Final confirmation message
-3. Responses
-Show submitted responses in a table/card view:
-- Date/time of response
-- Single? answer
-- Free? answer
-- Selected date
-- Selected date range
-DESIGN:
-- Mobile-first because this will primarily be sent as a link to a phone.
-- Romantic but not overly complicated.
-- Pink/red/purple pastel color palette.
-- Rounded cards and buttons.
-- Smooth modal transitions.
-- Heart animations.
-- Subtle confetti animation after final confirmation.
-- Beautiful typography.
-- Large touch-friendly buttons.
-- Responsive on desktop and mobile.
-IMPORTANT BEHAVIOR:
-- The "No" buttons should not allow the user to bypass the intended flow.
-- The date picker must respect the dates configured in the admin panel.
-- Persist admin settings and submitted responses in a database.
-- Do not use hardcoded dates in the frontend.
-- Add proper loading, error, and empty states.
-- Validate the selected date/date range before submission.
-- Prevent selecting blocked/unavailable dates.
-- Make the UI feel like a personal romantic invitation rather than a generic form.
-TECHNICAL REQUIREMENTS:
-- Use React/Next.js with TypeScript.
-- Use a clean component-based architecture.
-- Use a database for admin settings and responses.
-- Use reusable Modal, Button, Calendar, DateRangePicker, and Admin components.
-- Keep the code clean and production-ready.
-- Include authentication/protection for the admin panel.
-- The public invitation page should not expose admin functionality.
-Create the complete working application, including the public invitation flow, admin dashboard, database models, API/server actions, validation, responsive styling, animations, and polished empty/loading/error states.
+A personal invitation for Sanskruti built with React 19, TypeScript, TanStack Start, Tailwind CSS, Motion and Firebase Firestore.
 
-This project was built with [Lovable](https://lovable.dev).
+## Invitation
 
-**Live app**: https://romance-dates.lovable.app
+The public `/` page renders immediately from bundled settings with no database or authentication request on page load. The flow is welcome → “Are you single?” → date idea → outfit photo slider → date selection → confirmation. “No” moves to a random visible position and requests phone vibration when supported. There is no “Are you free?” step or teasing message.
 
-## Build with Lovable
+Cards, buttons and modals use `rounded-lg`; modals are centered on mobile and desktop. Date selection is a simple single-day calendar without mode tabs. Only final confirmation contacts Firestore: it rechecks current availability and saves a response.
 
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/5611843e-1251-4dc8-8d99-aaa125898207).
+## Local development
 
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
-
-## Development
-
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+Use Node.js 24 or newer and npm:
 
 ```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
+npm install
 npm run dev
+npm run typecheck
+npm test
+npm run build
 ```
+
+The development server runs at http://localhost:8080. npm and `package-lock.json` are the supported package manager and lockfile.
+
+## Firebase
+
+The checked-in `.env` contains the public web app configuration for `thesamplebee`. Firestore uses the default database; Realtime Database and Analytics are not initialized. Never add service-account credentials to client environment variables.
+
+Collections:
+
+- `invite_settings/default`: invitation text, date rules, derived `available_windows`, and a server timestamp `updated_at`.
+- `invite_responses/{autoId}`: confirmed availability, selected date or range, `window_index`, `date_type`, `outfit`, and server timestamp `created_at`. The compatibility fields `is_single` and `is_free` indicate the positive invitation answer and availability confirmed by choosing dates.
+
+Edit `firebase/invite-settings.json` to change the bundled UI. To publish those same settings to Firestore, use a trusted service account through `GOOGLE_APPLICATION_CREDENTIALS` and run:
+
+```sh
+npm run firebase:seed
+```
+
+This creates the document only if it does not exist. For an intentional settings update:
+
+```sh
+npm run firebase:seed -- --update
+```
+
+The script and settings hook derive contiguous available windows from the blocked dates. Always use them when updating date rules so a range cannot cross a blocked day. Historical responses are not imported by the settings script.
+
+## Access rules
+
+`firestore.rules` allows public reads of the invitation and validated response creation. Settings writes and response reads require a Firebase Authentication custom claim `admin: true`, assigned by a trusted administrator. There are no login or admin dashboard pages in this repository, and clients cannot grant themselves admin access.
+
+Publish rules after signing in with an account that manages this Firebase project. If the project hosts other apps, merge their existing rules before publishing this file:
+
+```sh
+npx firebase-tools login
+npx firebase-tools deploy --only firestore:rules --project thesamplebee
+```
+
+Local rule changes do not automatically update Firebase's live rules. Verify deployment before sharing the invitation publicly.
+
+## Firestore rules tests
+
+Requires Java 21 and the Firebase CLI (downloaded by npx). All test data stays in a local demo project:
+
+```sh
+npm run test:rules
+```
+
+Tests cover public/private access, admin claims, valid submissions, blocked dates and ranges, disabled selection, timestamp forgery, invalid fields and role escalation.
+
+## Lovable
+
+This repository remains connected to the Lovable editor. Avoid rewriting published Git history. Pushing changes to the connected branch syncs them to Lovable.
