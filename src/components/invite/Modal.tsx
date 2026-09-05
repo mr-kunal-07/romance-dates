@@ -1,5 +1,4 @@
-import { AnimatePresence, motion } from "motion/react";
-import type { ReactNode } from "react";
+import { useEffect, useId, useRef, type ReactNode } from "react";
 
 export type ModalProps = {
   open: boolean;
@@ -11,38 +10,42 @@ export type ModalProps = {
 
 /** Reusable, non-dismissable romantic modal card with smooth step transitions. */
 export function Modal({ open, stepKey, title, children }: ModalProps) {
+  const titleId = useId();
+  const cardRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const overflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    cardRef.current?.focus({ preventScroll: true });
+    return () => {
+      document.body.style.overflow = overflow;
+    };
+  }, [open]);
+  if (!open) return null;
   return (
-    <AnimatePresence>
-      {open && (
-        <motion.div
-          key="backdrop"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          role="dialog"
-          aria-modal="true"
-        >
-          <div className="absolute inset-0 bg-foreground/25 backdrop-blur-sm" />
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={stepKey}
-              className="card-glass relative max-h-[calc(100dvh-2rem)] w-full max-w-md overflow-y-auto rounded-lg p-6 sm:p-8"
-              initial={{ opacity: 0, y: 32, scale: 0.96 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -20, scale: 0.97 }}
-              transition={{ type: "spring", stiffness: 260, damping: 26 }}
-            >
-              {title ? (
-                <h2 className="text-balance-pretty text-center text-2xl leading-snug font-semibold text-foreground sm:text-3xl">
-                  {title}
-                </h2>
-              ) : null}
-              <div className={title ? "mt-6" : undefined}>{children}</div>
-            </motion.div>
-          </AnimatePresence>
-        </motion.div>
-      )}
-    </AnimatePresence>
+    <div
+      className="invite-modal fixed inset-0 z-50 flex items-center justify-center bg-foreground/25"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={title ? titleId : undefined}
+      aria-label={title ? undefined : "Your date confirmation"}
+    >
+      <div
+        key={stepKey}
+        ref={cardRef}
+        tabIndex={-1}
+        className="invite-modal-card card-glass animate-card-in relative min-w-0 w-full max-w-md overflow-y-auto overscroll-contain rounded-lg p-4 outline-none sm:p-6"
+      >
+        {title && (
+          <h2
+            id={titleId}
+            className="text-balance-pretty text-center text-[1.375rem] leading-snug font-semibold text-foreground sm:text-3xl"
+          >
+            {title}
+          </h2>
+        )}
+        <div className={title ? "mt-4 sm:mt-5" : undefined}>{children}</div>
+      </div>
+    </div>
   );
 }

@@ -25,7 +25,7 @@ const looks = (
 ).map((look) => ({
   ...look,
   title: outfits.find((outfit) => outfit.value === look.value)!.label,
-  image: `/images/outfits/${look.value}.png`,
+  image: `/images/outfits/${look.value}-800.webp`,
 }));
 
 export function OutfitChooser({
@@ -60,7 +60,7 @@ export function OutfitChooser({
   }, [api]);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <p className="text-center text-sm text-muted-foreground">
         A little twinning, a little romance. Swipe to pick our look. 💕
       </p>
@@ -95,11 +95,15 @@ export function OutfitChooser({
               >
                 <img
                   src={look.image}
+                  srcSet={`/images/outfits/${look.value}-400.webp 400w, ${look.image} 800w`}
+                  sizes="(max-width: 480px) calc(100vw - 60px), 400px"
+                  decoding="async"
+                  loading={slideIndex === initialIndex ? "eager" : "lazy"}
                   alt={look.alt}
                   width={1122}
                   height={1402}
                   draggable={false}
-                  className="h-[min(44dvh,390px)] w-full object-contain"
+                  className="outfit-photo w-full object-contain"
                 />
                 <div
                   aria-hidden
@@ -141,7 +145,7 @@ export function OutfitChooser({
             aria-label={`Show ${look.title}`}
             aria-pressed={index === dotIndex}
             onClick={() => api?.scrollTo(dotIndex)}
-            className="flex h-8 w-10 items-center justify-center rounded-lg focus-visible:outline-2 focus-visible:outline-primary"
+            className="flex h-11 w-11 touch-manipulation items-center justify-center rounded-lg focus-visible:outline-2 focus-visible:outline-primary"
           >
             <span
               className={`h-1.5 rounded-full transition-all ${index === dotIndex ? "w-6 bg-primary" : "w-1.5 bg-primary/25"}`}

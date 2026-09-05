@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, type CSSProperties } from "react";
 
 type Heart = {
   left: number;
@@ -9,7 +9,7 @@ type Heart = {
 };
 
 /** Decorative floating hearts layer. Purely visual, never interactive. */
-export function FloatingHearts({ count = 14 }: { count?: number }) {
+export function FloatingHearts({ count = 8 }: { count?: number }) {
   const hearts = useMemo<Heart[]>(
     () =>
       Array.from({ length: count }, (_, i) => ({
@@ -23,7 +23,7 @@ export function FloatingHearts({ count = 14 }: { count?: number }) {
   );
 
   return (
-    <div aria-hidden className="pointer-events-none fixed inset-0 overflow-hidden">
+    <div aria-hidden className="floating-hearts pointer-events-none fixed inset-0 overflow-hidden">
       {hearts.map((heart, i) => (
         <span
           key={i}
@@ -35,6 +35,15 @@ export function FloatingHearts({ count = 14 }: { count?: number }) {
             animationDelay: `${heart.delay}s`,
             opacity: heart.opacity,
           }}
+        >
+          ♥
+        </span>
+      ))}
+      {[-70, 0, 70].map((drift, i) => (
+        <span
+          key={`center-${drift}`}
+          className="center-heart absolute bottom-0 left-1/2 text-lg text-primary/50"
+          style={{ "--heart-drift": `${drift}px`, animationDelay: `${i * 2.5}s` } as CSSProperties}
         >
           ♥
         </span>

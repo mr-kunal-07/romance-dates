@@ -90,38 +90,33 @@ export function useResponses() {
   });
 }
 
-export function useSubmitResponse() {
-  return useMutation({
-    mutationFn: async ({
-      selection,
-      plan,
-    }: {
-      selection: Selection | null;
-      plan: DatePlan | null;
-    }) => {
-      const preferences = datePlanSchema.parse(plan);
-      // Re-read availability when saving in case it changed after opening the calendar.
-      const settings = await fetchSettings();
-      const problem = validateSelection(selection, settings);
-      if (problem) throw new Error(problem);
-      if (!selection) throw new Error("Please pick a date first.");
-      const start = selection.kind === "single" ? selection.date : selection.start;
-      const end = selection.kind === "single" ? selection.date : selection.end;
-      const windowIndex = settings.available_windows.findIndex(
-        (window) => start >= window.start && end <= window.end,
-      );
-      if (windowIndex < 0)
-        throw new Error("Those dates are no longer available. Please choose again.");
-      await addDoc(collection(getDb(), "invite_responses"), {
-        ...preferences,
-        is_single: true,
-        is_free: true,
-        selected_date: selection.kind === "single" ? selection.date : null,
-        range_start: selection.kind === "range" ? selection.start : null,
-        range_end: selection.kind === "range" ? selection.end : null,
-        window_index: windowIndex,
-        created_at: serverTimestamp(),
-      });
-    },
+export async function saveResponse({
+  selection,
+  plan,
+}: {
+  selection: Selection | null;
+  plan: DatePlan | null;
+}) {
+  const preferences = datePlanSchema.parse(plan);
+  // Re-read availability when saving in case it changed after opening the calendar.
+  const settings = await fetchSettings();
+  const problem = validateSelection(selection, settings);
+  if (problem) throw new Error(problem);
+  if (!selection) throw new Error("Please pick a date first.");
+  const start = selection.kind === "single" ? selection.date : selection.start;
+  const end = selection.kind === "single" ? selection.date : selection.end;
+  const windowIndex = settings.available_windows.findIndex(
+    (window) => start >= window.start && end <= window.end,
+  );
+  if (windowIndex < 0) throw new Error("Those dates are no longer available. Please choose again.");
+  await addDoc(collection(getDb(), "invite_responses"), {
+    ...preferences,
+    is_single: true,
+    is_free: true,
+    selected_date: selection.kind === "single" ? selection.date : null,
+    range_start: selection.kind === "range" ? selection.start : null,
+    range_end: selection.kind === "range" ? selection.end : null,
+    window_index: windowIndex,
+    created_at: serverTimestamp(),
   });
 }

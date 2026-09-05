@@ -1,4 +1,3 @@
-import { motion } from "motion/react";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 
@@ -80,16 +79,15 @@ export function DodgingNoButton({ children }: { children: ReactNode }) {
   }
 
   const button = (
-    <motion.button
+    <button
       ref={buttonRef}
       type="button"
       onClick={dodge}
-      whileTap={{ scale: 0.95 }}
       className="pointer-events-auto inline-flex h-14 items-center justify-center rounded-lg border border-border bg-secondary px-6 text-base font-semibold text-secondary-foreground shadow-soft focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
       style={position ? { position: "fixed", zIndex: 60, ...position } : { width: "100%" }}
     >
       {children}
-    </motion.button>
+    </button>
   );
 
   return position && portalHost ? (

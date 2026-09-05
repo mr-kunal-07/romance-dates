@@ -42,21 +42,23 @@ export function BackgroundMusic() {
     <>
       <audio
         ref={audioRef}
-        src="/audio/ajab-si.mp3"
         autoPlay
         loop
-        preload="auto"
+        preload="metadata"
         onPlay={() => setPlaying(true)}
         onPause={() => setPlaying(false)}
         onError={() => setPlaying(false)}
-      />
+      >
+        <source src="/audio/ajab-si.m4a" type="audio/mp4" />
+        <source src="/audio/ajab-si.mp3" type="audio/mpeg" />
+      </audio>
       <button
         ref={controlRef}
         type="button"
         onClick={toggle}
         aria-label={playing ? "Pause background music" : "Play background music"}
         title={playing ? "Pause Ajab Si" : "Play Ajab Si"}
-        className="fixed top-3 right-3 z-[100] flex h-11 w-11 items-center justify-center rounded-full border border-primary/20 bg-white/90 text-primary shadow-sm backdrop-blur-sm focus-visible:outline-2 focus-visible:outline-primary"
+        className="music-control fixed z-[100] flex h-11 w-11 touch-manipulation items-center justify-center rounded-full border border-primary/20 bg-white text-primary shadow-sm focus-visible:outline-2 focus-visible:outline-primary"
       >
         {playing ? <Volume2 className="h-5 w-5" /> : <VolumeX className="h-5 w-5" />}
       </button>

@@ -1,5 +1,4 @@
 import { CalendarHeart, Heart } from "lucide-react";
-import { motion } from "motion/react";
 
 import { formatPretty, fromISODate, type Selection } from "@/lib/invite";
 import { makeWhatsAppMessage, type DatePlan } from "@/lib/date-plan";
@@ -29,10 +28,7 @@ export function DateConfirmation({
           <span className="h-px w-8 bg-primary/30" /> YOU + ME{" "}
           <span className="h-px w-8 bg-primary/30" />
         </p>
-        <motion.div
-          initial={{ scale: 0.6, rotate: -12 }}
-          animate={{ scale: 1, rotate: 0 }}
-          transition={{ type: "spring", stiffness: 180, damping: 12 }}
+        <div
           className="relative mx-auto mt-5 flex h-20 w-20 items-center justify-center rounded-full border border-white/80 bg-gradient-to-br from-white to-blush shadow-soft"
           aria-hidden
         >
@@ -42,7 +38,7 @@ export function DateConfirmation({
             strokeWidth={1}
           />
           <span className="absolute -left-3 bottom-2 text-lg text-primary/60">✧</span>
-        </motion.div>
+        </div>
         <h2 className="mt-5 text-3xl leading-tight font-semibold text-foreground sm:text-4xl">
           Sanskruti,
           <br />

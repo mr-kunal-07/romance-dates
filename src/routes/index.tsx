@@ -1,20 +1,24 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { motion } from "motion/react";
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import { FloatingHearts } from "@/components/invite/FloatingHearts";
 import { HeartButton } from "@/components/invite/HeartButton";
 import { DodgingNoButton } from "@/components/invite/DodgingNoButton";
 import { Modal } from "@/components/invite/Modal";
-import { DateChooser } from "@/components/invite/DateChooser";
 import { DateConfirmation } from "@/components/invite/DateConfirmation";
 import { DateTypeChooser, PlanSummary } from "@/components/invite/DatePreferences";
-import { OutfitChooser } from "@/components/invite/OutfitChooser";
 import { BackgroundMusic } from "@/components/invite/BackgroundMusic";
 import type { DatePlan } from "@/lib/date-plan";
-import { useSubmitResponse } from "@/hooks/useInvite";
+import { useSubmitResponse } from "@/hooks/useSubmitResponse";
 import { inviteSettings } from "@/lib/invite-settings";
 import { celebrate } from "@/lib/confetti";
 import { formatPretty, type Selection } from "@/lib/invite";
+
+const DateChooser = lazy(() =>
+  import("@/components/invite/DateChooser").then((module) => ({ default: module.DateChooser })),
+);
+const OutfitChooser = lazy(() =>
+  import("@/components/invite/OutfitChooser").then((module) => ({ default: module.OutfitChooser })),
+);
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -66,20 +70,18 @@ function InvitePage() {
   }
 
   return (
-    <main className="bg-romance relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-5 py-12">
-      <FloatingHearts />
+    <main
+      className="invite-page bg-romance relative flex min-h-svh flex-col items-center justify-center px-3 py-16 sm:px-5"
+      data-modal-open={step !== null}
+    >
+      {step === null && <FloatingHearts />}
       <BackgroundMusic />
 
-      <section className="relative z-10 w-full max-w-md text-center">
+      <section className="relative z-10 w-full max-w-md text-center" inert={step !== null}>
         {settings && (
-          <motion.div
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
-            className="card-glass rounded-lg px-6 py-10 sm:px-10"
-          >
+          <div className="card-glass animate-card-in rounded-lg px-5 py-8 sm:px-10 sm:py-10">
             <span className="animate-heartbeat inline-block text-5xl">❤️</span>
-            <h1 className="text-balance-pretty mt-5 text-4xl leading-tight font-semibold sm:text-5xl">
+            <h1 className="text-balance-pretty mt-5 text-3xl leading-tight font-semibold sm:text-5xl">
               {settings.welcome_title}
             </h1>
             <p className="text-balance-pretty mt-4 text-base text-muted-foreground">
@@ -89,7 +91,7 @@ function InvitePage() {
               <HeartButton onClick={() => setStep("single")}>{settings.cta_label}</HeartButton>
             </div>
             <p className="mt-4 text-xs text-muted-foreground">made with far too much love 💌</p>
-          </motion.div>
+          </div>
         )}
       </section>
 
@@ -117,23 +119,39 @@ function InvitePage() {
           </Modal>
 
           <Modal open={step === "outfit"} stepKey="outfit" title="What shall we wear? ✨">
-            <OutfitChooser
-              outfit={outfit}
-              onOutfitChange={setOutfit}
-              onBack={() => setStep("date-type")}
-              onNext={() => setStep("date")}
-            />
+            <Suspense
+              fallback={
+                <p role="status" className="py-12 text-center">
+                  Getting our outfits ready… 💕
+                </p>
+              }
+            >
+              <OutfitChooser
+                outfit={outfit}
+                onOutfitChange={setOutfit}
+                onBack={() => setStep("date-type")}
+                onNext={() => setStep("date")}
+              />
+            </Suspense>
           </Modal>
 
           <Modal open={step === "date"} stepKey="date" title={settings.date_title}>
-            <DateChooser
-              settings={settings}
-              initialSelection={selection}
-              onConfirm={(value) => {
-                setSelection(value);
-                setStep("confirm");
-              }}
-            />
+            <Suspense
+              fallback={
+                <p role="status" className="py-12 text-center">
+                  Opening our calendar… 💕
+                </p>
+              }
+            >
+              <DateChooser
+                settings={settings}
+                initialSelection={selection}
+                onConfirm={(value) => {
+                  setSelection(value);
+                  setStep("confirm");
+                }}
+              />
+            </Suspense>
             <button
               type="button"
               onClick={() => setStep("outfit")}

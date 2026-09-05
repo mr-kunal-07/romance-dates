@@ -40,7 +40,7 @@ export function DateChooser({
 
   return (
     <div className="space-y-5">
-      <div className="flex justify-center rounded-lg border border-border bg-card p-2">
+      <div className="flex min-w-0 justify-center rounded-lg border border-border bg-card p-1">
         <Calendar
           mode="single"
           selected={date}
@@ -52,7 +52,7 @@ export function DateChooser({
           defaultMonth={date ?? initialMonth}
           startMonth={min}
           endMonth={max}
-          className="pointer-events-auto p-2"
+          className="invite-calendar pointer-events-auto p-1"
         />
       </div>
       <p className="text-center text-sm text-muted-foreground">

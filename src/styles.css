@@ -101,11 +101,22 @@
   --sidebar-border: oklch(0.9 0.035 340);
   --sidebar-ring: oklch(0.72 0.14 350);
 
-  --gradient-romance: linear-gradient(140deg, oklch(0.97 0.03 340), oklch(0.94 0.05 320) 45%, oklch(0.95 0.045 30));
-  --gradient-primary: linear-gradient(135deg, oklch(0.72 0.17 355), oklch(0.66 0.19 5) 55%, oklch(0.64 0.16 330));
+  --gradient-romance: linear-gradient(
+    140deg,
+    oklch(0.97 0.03 340),
+    oklch(0.94 0.05 320) 45%,
+    oklch(0.95 0.045 30)
+  );
+  --gradient-primary: linear-gradient(
+    135deg,
+    oklch(0.72 0.17 355),
+    oklch(0.66 0.19 5) 55%,
+    oklch(0.64 0.16 330)
+  );
   --gradient-card: linear-gradient(160deg, oklch(1 0 0 / 0.92), oklch(0.98 0.02 340 / 0.82));
   --shadow-soft-value: 0 18px 45px -20px oklch(0.6 0.18 350 / 0.45);
-  --shadow-glow-value: 0 0 0 6px oklch(0.72 0.14 350 / 0.12), 0 20px 40px -18px oklch(0.6 0.18 350 / 0.5);
+  --shadow-glow-value:
+    0 0 0 6px oklch(0.72 0.14 350 / 0.12), 0 20px 40px -18px oklch(0.6 0.18 350 / 0.5);
 }
 
 .dark {
@@ -153,7 +164,6 @@
 
 @utility card-glass {
   background-image: var(--gradient-card);
-  backdrop-filter: blur(16px);
   border: 1px solid oklch(1 0 0 / 0.5);
   box-shadow: var(--shadow-soft-value);
 }
@@ -217,5 +227,87 @@
 }
 
 @utility animate-heartbeat {
-  animation: heartbeat 1.6s ease-in-out infinite;
+  animation: heartbeat 2s ease-in-out 3;
+}
+
+/* Keep every step usable with browser chrome, notches, and short landscape screens. */
+.invite-modal {
+  --modal-top: max(3.75rem, env(safe-area-inset-top));
+  --modal-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  padding: var(--modal-top) max(0.75rem, env(safe-area-inset-right)) var(--modal-bottom)
+    max(0.75rem, env(safe-area-inset-left));
+}
+.invite-modal-card {
+  max-height: calc(100dvh - var(--modal-top) - var(--modal-bottom));
+  scrollbar-width: thin;
+}
+.music-control {
+  top: max(0.5rem, env(safe-area-inset-top));
+  right: max(0.75rem, env(safe-area-inset-right));
+}
+.outfit-photo {
+  height: clamp(160px, calc(100svh - 400px), 360px);
+}
+.invite-calendar {
+  width: 100%;
+  --cell-size: clamp(2rem, calc((100vw - 5rem) / 7), 2.75rem);
+}
+.invite-page[data-modal-open="true"] > section {
+  visibility: hidden;
+}
+.invite-page[data-modal-open="true"] .animate-heartbeat {
+  animation: none;
+}
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-card-in {
+  animation: card-in 160ms ease-out;
+}
+@keyframes center-heart-rise {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 0) scale(0.7);
+  }
+  20% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--heart-drift)), -105svh) scale(1.05);
+  }
+}
+.center-heart {
+  opacity: 0;
+  animation: center-heart-rise 8s linear infinite;
+}
+@media (max-width: 639px) {
+  .floating-hearts > .animate-float-up:nth-child(n + 6) {
+    display: none;
+  }
+  .card-glass {
+    background: linear-gradient(160deg, #fffafd, #fff0f6);
+    box-shadow: 0 8px 24px -16px #b84e7d66;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .center-heart,
+  .animate-card-in,
+  .animate-heartbeat,
+  .animate-float-up {
+    animation: none;
+  }
+  .floating-hearts {
+    display: none;
+  }
+  .invite-page button {
+    transition: none;
+  }
 }
